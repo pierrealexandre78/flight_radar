@@ -4,8 +4,7 @@ from random import choice
 from confluent_kafka import Producer
 import os 
 
-# example url: localhost:45983
-KAFKA_SERVER_URL = os.environ.get('KAFKA_SERVER_URL')
+KAFKA_SERVER_URL = 'localhost:29092'
 TOPIC = "live_flight_positions_full_france"
 
 if __name__ == '__main__':
@@ -31,8 +30,6 @@ if __name__ == '__main__':
             print("Produced event to topic {topic}: key = {key:12} value = {value:12}".format(
                 topic=msg.topic(), key=msg.key().decode('utf-8'), value=msg.value().decode('utf-8')))
 
-
-
     with open('data/live_flight_positions_full_france.json', 'r') as f:
         json_live_flight_positions_full_france = json.load(f)['data']
 
@@ -49,7 +46,7 @@ if __name__ == '__main__':
     for _ in range(10):
         flight_number= choice(flight_numbers_list)
         destination = choice(destinations_list)
-        producer.produce(TOPIC,destination, flight_number, callback=delivery_callback)
+        producer.produce(TOPIC, destination, flight_number, callback=delivery_callback)
         count += 1
 
     # Block until the messages are sent.

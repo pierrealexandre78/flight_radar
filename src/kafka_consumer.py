@@ -5,7 +5,7 @@ import os
 from confluent_kafka import Consumer
 
 # example url: localhost:45983
-KAFKA_SERVER_URL = os.environ.get('KAFKA_SERVER_URL')
+KAFKA_SERVER_URL = 'localhost:29092'
 TOPIC = "live_flight_positions_full_france"
 
 if __name__ == '__main__':
