@@ -18,47 +18,31 @@ Setup Kafka server on Azure VM:
 2. Start the instance, the azure console should look like this:
 3. Connect to the instance in ssh using the private key given at the VM creation: I used vscode server
 
-4. install and start Docker Engine . Verify that Docker is set up properly by ensuring that no errors are output when you run docker info in your terminal.
+4. install and start Docker Engine
 #### Install [Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 ```bash
-# Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-echo \
-"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-$(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-
-# install the docker package
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# verify that the installation is successful by installing the hello_world image
-sudo docker run hello-world
+make install_docker
 ```
 
-6. Kafka Confluent setup
-#### Install kafka
-```bash
-make install_kafka
-```
+5. Kafka setup
 #### Start the kafka server
 ```bash
-sudo confluent local kafka start
+make start_kafka
 ```
 
 #### Create the topic: live flight position 
 ```bash
-sudo confluent local kafka topic create live_flight_positions_full_france
+make create_topic
 ```
 
-4. Run the producer locally or on another VM.
+#### Run the producer
+```bash
+python src/kafka_producer.py
+```
+#### Run the consumer
+```bash
+python src/kafka_consumer.py
+```
 
-5. Run the consumer locally or on another VM.
 
 
