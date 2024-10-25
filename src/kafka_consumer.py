@@ -1,47 +1,69 @@
-import time
-import os
 #!/usr/bin/env python
-
-from confluent_kafka import Consumer
+from confluent_kafka import Consumer, KafkaException, KafkaError
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+import os
+import json
+import time
 
 # example url: localhost:45983
-KAFKA_SERVER_URL = os.environ.get('KAFKA_SERVER_URL')
+KAFKA_SERVER_URL = 'localhost:29092'
 TOPIC = "live_flight_positions_full_france"
+AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 
-if __name__ == '__main__':
+# Define the JSON deserializer
+def json_deserializer(value):
+    if value is None:
+        return None
+    return json.loads(value.decode('utf-8'))
 
-    config = {
-        # User-specific properties : local env here
-        'bootstrap.servers': KAFKA_SERVER_URL,
+# Consumer configuration
+consumer_conf = {
+    'bootstrap.servers': KAFKA_SERVER_URL,
+    'group.id': 'live_flight_positions_full_france_consumer_group',
+    'auto.offset.reset': 'earliest'
+}
 
-        # Fixed properties
-        'group.id':          'live_flight_positions',
-        'auto.offset.reset': 'earliest'
-    }
+# Create a Consumer instance
+consumer = Consumer(consumer_conf)
 
-    # Create Consumer instance
-    consumer = Consumer(config)
+# Subscribe to the topic
+consumer.subscribe([TOPIC])
 
-    # Subscribe to topic
-    consumer.subscribe([TOPIC])
+# Connect to your Azure Blob Storage account
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+container_name = "flightdata"
+# Create the container
+# container_client = blob_service_client.create_container(container_name)
+# time.sleep(10)
+# Get a reference to the container
+container_client = blob_service_client.get_container_client(container_name)
 
-    # Poll for new messages from Kafka and print them.
-    try:
-        while True:
-            msg = consumer.poll(1.0)
-            if msg is None:
-                # Initial message consumption may take up to
-                # `session.timeout.ms` for the consumer group to
-                # rebalance and start consuming
-                print("Waiting...")
+try:
+    while True:
+        msg = consumer.poll(timeout=1.0)
+        if msg is None:
+            print("Waiting for message...")
+            continue
+        if msg.error():
+            if msg.error().code() == KafkaError._PARTITION_EOF:
+                # End of partition event
+                print('%% %s [%d] reached end at offset %d\n' %
+                      (msg.topic(), msg.partition(), msg.offset()))
             elif msg.error():
-                print("ERROR: %s".format(msg.error()))
-            else:
-                # Extract the (optional) key and value, and print.
-                print("Consumed event from topic {topic}: key = {key:12} value = {value:12}".format(
-                    topic=msg.topic(), key=msg.key().decode('utf-8'), value=msg.value().decode('utf-8')))
-    except KeyboardInterrupt:
-        pass
-    finally:
-        # Leave group and commit final offsets
-        consumer.close()
+                raise KafkaException(msg.error())
+        else:
+            # Process the received message
+            print(f"Received message: key: {msg.key().decode('utf-8')}")
+            # Deserialize the JSON message
+            data = json_deserializer(msg.value())
+            print(f'Received message: data: {data}')
+            # Process messages and upload to Azure Blob Storage
+            blob_name = f"flight_info_{msg.key().decode('utf-8')}.json"
+            blob_client = container_client.get_blob_client(blob=blob_name)
+            blob_client.upload_blob(msg.value(), overwrite=False)
+
+except KeyboardInterrupt:
+    pass
+finally:
+    # Close down consumer to commit final offsets.
+    consumer.close()

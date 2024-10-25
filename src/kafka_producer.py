@@ -1,57 +1,63 @@
-import time
-import json
-from random import choice
 from confluent_kafka import Producer
-import os 
+import json
 
-# example url: localhost:45983
-KAFKA_SERVER_URL = os.environ.get('KAFKA_SERVER_URL')
+KAFKA_SERVER_URL = 'localhost:29092'
+# Define the topic
 TOPIC = "live_flight_positions_full_france"
 
-if __name__ == '__main__':
+# Define the examplemessage
+example_message = {
+    "fr24_id": "37acbb1e",
+    "flight": "SKV112",
+    "callsign": "SKV112",
+    "lat": 50.89319,
+    "lon": 3.73833,
+    "track": 106,
+    "alt": 41000,
+    "gspeed": 460,
+    "vspeed": -64,
+    "squawk": "5242",
+    "timestamp": "2024-10-23T15:00:33Z",
+    "source": "ADSB",
+    "hex": "4401DA",
+    "type": "F2TH",
+    "reg": "OE-HHS",
+    "painted_as": "SKV",
+    "operating_as": "SKV",
+    "orig_iata": "LTN",
+    "orig_icao": "EGGW",
+    "dest_iata": "LCA",
+    "dest_icao": "LCLK",
+    "eta": "2024-10-23T18:40:57Z"
+}
 
-    config = {
-        # User-specific properties : local env here
-        'bootstrap.servers': KAFKA_SERVER_URL,
+# Producer configuration
+producer_conf = {
+    'bootstrap.servers': KAFKA_SERVER_URL
+}
 
-        # Fixed properties
-        'acks': 'all'
-    }
+# Create a Producer instance
+producer = Producer(producer_conf)
 
-    # Create Producer instance
-    producer = Producer(config)
+# Define the delivery report callback function
+def delivery_report(err, msg):
+    if err is not None:
+        print('Message delivery failed: {}'.format(err))
+    else:
+        print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+    print('Message content: {}'.format(msg.value().decode('utf-8')))
 
-    # Optional per-message delivery callback (triggered by poll() or flush())
-    # when a message has been successfully delivered or permanently
-    # failed delivery (after retries).
-    def delivery_callback(err, msg):
-        if err:
-            print('ERROR: Message failed delivery: {}'.format(err))
-        else:
-            print("Produced event to topic {topic}: key = {key:12} value = {value:12}".format(
-                topic=msg.topic(), key=msg.key().decode('utf-8'), value=msg.value().decode('utf-8')))
+# load test data
+with open('data/live_flight_positions_full_france.json', 'r') as f:
+    json_live_flight_positions_full_france = json.load(f)['data']
 
+# split data into single flight info message
+for count, flight_info_message in enumerate(json_live_flight_positions_full_france):
+    # Produce the message
+    producer.produce(TOPIC,
+                     key=flight_info_message['fr24_id'].encode('utf-8'),
+                     value=json.dumps(flight_info_message).encode('utf-8'),
+                     callback=delivery_report)
 
-
-    with open('data/live_flight_positions_full_france.json', 'r') as f:
-        json_live_flight_positions_full_france = json.load(f)['data']
-
-    flight_numbers_list = []
-    destinations_list = []
-    for count, single_flight_info in enumerate(json_live_flight_positions_full_france):
-        if single_flight_info['callsign'] is not None:
-            flight_numbers_list.append(single_flight_info['callsign'])
-        if single_flight_info['dest_iata'] is not None:
-            destinations_list.append(single_flight_info['dest_iata'])
-
-    # Produce data by selecting random values from these lists.
-    count = 0
-    for _ in range(10):
-        flight_number= choice(flight_numbers_list)
-        destination = choice(destinations_list)
-        producer.produce(TOPIC,destination, flight_number, callback=delivery_callback)
-        count += 1
-
-    # Block until the messages are sent.
-    producer.poll(10000)
-    producer.flush()
+# Wait for any outstanding messages to be delivered
+producer.flush()
