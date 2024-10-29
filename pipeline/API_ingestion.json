@@ -1,0 +1,7 @@
+{
+	"name": "API_ingestion",
+	"properties": {
+		"description": "ingest data from flight radar API every 10mn and stores it in a blob storage",
+		"annotations": []
+	}
+}
