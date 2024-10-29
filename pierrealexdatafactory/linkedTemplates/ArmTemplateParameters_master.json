@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "pierrealexdatafactory"
+		},
+		"AzureBlobStoragepierrealex_connectionString": {
+			"value": ""
+		},
+		"AzureDataLakeStorageflights_accountKey": {
+			"value": ""
+		},
+		"AzureDataLakeStorageflights2_accountKey": {
+			"value": ""
+		},
+		"AzureDataLakeStorageflights_properties_typeProperties_url": {
+			"value": "https://azpierrealexstorage.dfs.core.windows.net/"
+		},
+		"AzureDataLakeStorageflights2_properties_typeProperties_url": {
+			"value": "https://azdatalakepierrealex.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

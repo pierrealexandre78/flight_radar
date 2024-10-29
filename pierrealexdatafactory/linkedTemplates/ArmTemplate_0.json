@@ -1,0 +1,291 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pierrealexdatafactory"
+		},
+		"AzureBlobStoragepierrealex_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStoragepierrealex'"
+		},
+		"AzureDataLakeStorageflights_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorageflights'"
+		},
+		"AzureDataLakeStorageflights2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorageflights2'"
+		},
+		"AzureDataLakeStorageflights_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azpierrealexstorage.dfs.core.windows.net/"
+		},
+		"AzureDataLakeStorageflights2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azdatalakepierrealex.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStoragepierrealex')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStoragepierrealex_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorageflights')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorageflights_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorageflights_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorageflights2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorageflights2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorageflights2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/triggercopyflightdataevery10mn')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "every 10 mn",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 10,
+						"startTime": "2024-10-29T16:59:00",
+						"endTime": "2024-11-02T17:01:22",
+						"timeZone": "Romance Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/live_flight_datalake_set')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorageflights2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorageflights2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/raw_flight_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStoragepierrealex",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "flightdata"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"fr24_id": {
+							"type": "string"
+						},
+						"flight": {
+							"type": "string"
+						},
+						"callsign": {
+							"type": "string"
+						},
+						"lat": {
+							"type": "number"
+						},
+						"lon": {
+							"type": "number"
+						},
+						"track": {
+							"type": "integer"
+						},
+						"alt": {
+							"type": "integer"
+						},
+						"gspeed": {
+							"type": "integer"
+						},
+						"vspeed": {
+							"type": "integer"
+						},
+						"squawk": {
+							"type": "string"
+						},
+						"timestamp": {
+							"type": "string"
+						},
+						"source": {
+							"type": "string"
+						},
+						"hex": {
+							"type": "string"
+						},
+						"type": {
+							"type": "string"
+						},
+						"reg": {
+							"type": "string"
+						},
+						"painted_as": {
+							"type": "string"
+						},
+						"operating_as": {
+							"type": "string"
+						},
+						"orig_iata": {
+							"type": "string"
+						},
+						"orig_icao": {
+							"type": "string"
+						},
+						"dest_iata": {
+							"type": "string"
+						},
+						"dest_icao": {
+							"type": "string"
+						},
+						"eta": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragepierrealex')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy live flight data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ingest data from flight radar API every 10mn and stores it in a blob storage",
+				"activities": [
+					{
+						"name": "Copy flight data from blob to lake",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "*",
+									"wildcardFileName": "*.json",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"dataIntegrationUnits": 4
+						},
+						"inputs": [
+							{
+								"referenceName": "raw_flight_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "live_flight_datalake_set",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/raw_flight_dataset')]",
+				"[concat(variables('factoryId'), '/datasets/live_flight_datalake_set')]"
+			]
+		}
+	]
+}
