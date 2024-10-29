@@ -1,5 +1,5 @@
 {
-	"name": "API_ingestion",
+	"name": "Copy live flight data",
 	"properties": {
 		"description": "ingest data from flight radar API every 10mn and stores it in a blob storage",
 		"activities": [
