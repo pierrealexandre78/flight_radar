@@ -1,0 +1,9 @@
+{
+	"name": "pierrealexdatafactory",
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a2b12f40-0b50-4601-aa54-819ecea73e33",
+		"tenantId": "1d01088c-eaf2-422b-a02f-b78838c98911"
+	}
+}
