@@ -7,7 +7,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "API_ingestion",
+					"referenceName": "Copy live flight data",
 					"type": "PipelineReference"
 				}
 			}
