@@ -1,0 +1,17 @@
+{
+	"name": "live_flight_datalake_set",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageflights2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation"
+			}
+		},
+		"schema": {}
+	}
+}

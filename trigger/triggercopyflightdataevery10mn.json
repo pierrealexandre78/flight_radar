@@ -1,0 +1,25 @@
+{
+	"name": "triggercopyflightdataevery10mn",
+	"properties": {
+		"description": "every 10 mn",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "API_ingestion",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 10,
+				"startTime": "2024-10-29T16:59:00",
+				"timeZone": "Romance Standard Time"
+			}
+		}
+	}
+}
