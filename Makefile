@@ -59,6 +59,20 @@ create_topic:
 stop_kafka:
 	sudo docker-compose down
 
+install_azure_cli:
+# https://www.gcptutorials.com/post/how-to-install-azure-cli-on-ubuntu#:~:text=1%20Step%201%3A%20Get%20required%20packages%20for%20Azure,package%20...%206%20Step%206%3A%20Verify%20the%20installation
+	sudo apt-get update
+    sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
+	curl -sL https://packages.microsoft.com/keys/microsoft.asc |
+	gpg --dearmor |
+	sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+	AZ_REPO=$(lsb_release -cs)                                                                                                                            [🐍 flight_radar_env]
+	echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |
+	sudo tee /etc/apt/sources.list.d/azure-cli.list
+	sudo apt-get update
+	sudo apt-get install azure-cli
+	az login
+
 
 
 
