@@ -53,5 +53,23 @@ python src/kafka_producer.py
 python src/kafka_consumer.py
 ```
 
+### Azure Functions
+The Goal is to create an azure function that will copy the live data (streamed by kafka into blob storage) every 10 mn into azure data lake gen2
+1. create a new azure function app in azure portal
+2. install azure function extension in your vscode, don't forget to connect to your azure account
+3. install azure cli in your terminal and connect. this installation is needed to add azure application environement variable to connect to blob storage and data lake storage
+```bash
+make install_azure_cli
+```
+verify that the installation worked and connnects to your azure account
+```bash
+az login
+```
+4. Use the azure cli to add your connection string
+add your blob storage and data lake connection strings as environement variable for your azure function app
+```bash
+az functionapp config appsettings set --name <FunctionAppName> --resource-group <ResourceGroupName> --settings "BLOB_CONNECTION_STRING=your_blob_connection_string"
+```
+Replace <FunctionAppName> with the name of your Function App, <ResourceGroupName> with the name of your resource group, and your_blob_connection_string with your actual connection string.
 
 
