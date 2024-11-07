@@ -4,10 +4,9 @@ from azure.storage.blob import BlobServiceClient
 from azure.storage.filedatalake import DataLakeServiceClient
 import os
 
-# Replace with your connection strings
+# Replace with your connection strings in .env OR local.settings.json file
 BLOB_CONNECTION_STRING = os.getenv("BLOB_CONNECTION_STRING")
 DATA_LAKE_CONNECTION_STRING = os.getenv("DATA_LAKE_CONNECTION_STRING")
-
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ADMIN)
 
@@ -18,6 +17,7 @@ def http_trigger_copy(req: func.HttpRequest) -> func.HttpResponse:
     blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONNECTION_STRING)
     datalake_service_client = DataLakeServiceClient.from_connection_string(DATA_LAKE_CONNECTION_STRING)
 
+    # Replace with your container names
     blob_container_name = "azpierrealexstorage"
     blob_name = "flightdata"
 
