@@ -1,6 +1,6 @@
 # Apache Kafka - Live Flight Data streaming
 
-Technology used: *Azure (VM, Blob Storage, Azure Functions, Azure Devops, Azure Data Lake Analytics, Azure Synapse), Kafka, Spark, python*
+Technology used: *Azure (VM, Blob Storage, Azure Functions, Azure Devops, Azure Data Lake Analytics, Azure Synapse), Kafka, python*
 
 ## Abstract
 
